@@ -20,7 +20,7 @@ class Environment:
 
     def initialize(self):
         self.state = np.zeros(shape=(4, 4), dtype=int)
-        self.currentState = 0
+        self.currentState = (0, 0)
 
         self.state[1][1] = self.statesMap['dead']
         self.state[3][3] = self.statesMap['goal']
@@ -31,24 +31,18 @@ class Environment:
             final[self.actionsMap[action]] = 1
         return final
     
-    def getIndex(self):
-        copy = self.state.copy().tolist()
-        frac, whole = math.modf(self.currentState / 4)
-        row = math.floor(whole)
-        col = [0, 0.25, 0.5, 0.75].index(frac)
-        return row, col
 
     
     def displayState(self):
         
         copy = self.state.copy().tolist()
-        row, col = self.getIndex()
+        row, col = self.currentState
         copy[row][col] = 'x'
         print(tabulate(copy, tablefmt='grid'))
 
     def getAction(self):
         validActions = list(self.actionsMap.values())
-        row, col = self.getIndex()
+        row, col = self.currentState
 
         if row == 0:
             validActions[self.actionsMap['up']] = -1
@@ -66,14 +60,17 @@ class Environment:
     def performAction(self):
         validActions = [i for i, v in enumerate(self.getAction()) if v != -1]
         choice = np.random.choice(validActions)
-        movements = [['up', -4], ['down', 4], ['left', -1], ['right', 1]]
-        
+        movements = [['up', 0, -1], ['down', 0, 1], ['left', 1, -1], ['right', 1, 1]]
+        row, col = self.currentState
         for movement in movements:
-            name, magnitude = movement
+            name, axis, magnitude = movement
             if self.actionsMap[name] == choice:
                 print(name, magnitude)
+                if axis == 1:
+                    self.currentState = (row, col + magnitude)
+                else:
+                    self.currentState = (row + magnitude, col)
 
-                self.currentState += magnitude
                 return
 
 
