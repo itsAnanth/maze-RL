@@ -14,6 +14,7 @@ class Environment:
         self.state = None
         self.actions = None
         self.currentState = None
+        self.qtable = None
 
         self.initialize()
         
@@ -21,7 +22,7 @@ class Environment:
     def initialize(self):
         self.state = np.zeros(shape=(4, 4), dtype=int)
         self.currentState = (0, 0)
-
+        self.qtable = {}
         self.state[1][1] = self.statesMap['dead']
         self.state[3][3] = self.statesMap['goal']
 
@@ -39,6 +40,7 @@ class Environment:
         row, col = self.currentState
         copy[row][col] = 'x'
         print(tabulate(copy, tablefmt='grid'))
+
 
     def getAction(self):
         validActions = list(self.actionsMap.values())
@@ -72,9 +74,22 @@ class Environment:
                     self.currentState = (row + magnitude, col)
 
                 return
+            
+    # def step(self):
+    #     state = self.currentState
+
+    #     if state not in self.qtable:
+    #         self.qtable[state] = { a: 0.0 for a in list(self.actionsMap.values()) }
+
+    #     if np.random.rand() < epsilon:
+    #         action = np.random.choice(self.getAction())
+    #     else:
+    #         action = max(self.qtable[state], key=self.qtable[state].get)
 
 
 env = Environment()
 env.displayState()
 env.performAction()
 env.displayState()
+
+
