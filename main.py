@@ -31,35 +31,37 @@ class Environment:
             final[self.actionsMap[action]] = 1
         return final
     
-    def displayState(self):
+    def getIndex(self):
         copy = self.state.copy().tolist()
         frac, whole = math.modf(self.currentState / 4)
         row = math.floor(whole)
         col = [0, 0.25, 0.5, 0.75].index(frac)
-        print(row, col)
-        copy[row][col] = 'x'
+        return row, col
 
+    
+    def displayState(self):
+        
+        copy = self.state.copy().tolist()
+        row, col = self.getIndex()
+        copy[row][col] = 'x'
         print(tabulate(copy, tablefmt='grid'))
 
     def getAction(self):
-        if self.currentState == 0:
-            return self.generateAction('right', 'down')
-        elif self.currentState == 3:
-            return self.generateAction('left', 'down')
-        elif self.currentState == 12:
-            return self.generateAction('up', 'right')
-        elif self.currentState == 15:
-            return self.generateAction('up', 'left')
-        elif self.currentState in [1, 2]:
-            return self.generateAction('left', 'right', 'down')
-        elif self.currentState in [4, 8]:
-            return self.generateAction('up', 'down', 'right')
-        elif self.currentState in [7, 11]:
-            return self.generateAction('up', 'down', 'left')
-        elif self.currentState in [13, 14]:
-            return self.generateAction('left', 'right', 'up')
-        else:
-            return self.generateAction('up', 'down', 'left', 'right')
+        validActions = list(self.actionsMap.values())
+        row, col = self.getIndex()
+
+        if row == 0:
+            validActions[self.actionsMap['up']] = -1
+        if row == self.state.shape[0] - 1:
+            validActions[self.actionsMap['down']] = -1
+
+        if col == 0:
+            validActions[self.actionsMap['left']] = -1
+        if col == self.state.shape[1] - 1:
+            validActions[self.actionsMap['right']] = -1
+
+        return validActions
+
         
     def performAction(self):
         validActions = [i for i, v in enumerate(self.getAction()) if v != -1]
