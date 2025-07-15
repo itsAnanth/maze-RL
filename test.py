@@ -79,7 +79,7 @@ env = Environment()
 alpha = 0.1
 gamma = 0.9
 epsilon = 0.2
-episodes = 500
+episodes = 1000
 
 for ep in range(episodes):
     state = env.reset()
@@ -94,7 +94,8 @@ for ep in range(episodes):
         if np.random.rand() < epsilon:
             action = np.random.choice(env.getValidActions(state))
         else:
-            action = max(env.qtable[state], key=env.qtable[state].get)
+            valid = { k: v for k, v in env.qtable[state].items() if k in env.getValidActions(state) }
+            action = max(valid, key=valid.get)
 
         next_state, reward, done = env.step(action)
         R += reward
@@ -103,10 +104,10 @@ for ep in range(episodes):
             env.qtable[next_state] = { a: 0.0 for a in env.actionsMap.values() }
 
         # Q-learning update
+        print(state, env.getValidActions(state))
         env.qtable[state][action] = env.qtable[state][action] + alpha * (
             reward + gamma * max(env.qtable[next_state].values()) - env.qtable[state][action]
         )
-
         state = next_state
     
     print(f"episode: {ep}, reward: {R}")
@@ -119,7 +120,7 @@ for r in range(4):
     for c in range(4):
         state = (r, c)
         if state == (1,1):
-            grid[r][c] = '💀'
+            grid[r][c] = 'x'
         elif state == (3,3):
             grid[r][c] = 'G'
         elif state in env.qtable:
@@ -130,3 +131,5 @@ for r in range(4):
 
 print("\nLearned Policy:")
 print(tabulate(grid, tablefmt='grid'))
+
+print(tabulate([k for k in env.qtable.values()]))
